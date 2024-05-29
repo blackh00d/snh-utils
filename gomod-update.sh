@@ -1,12 +1,21 @@
 #!/bin/bash
 
-#!/bin/bash
+CONFIG_FILE="/tmp/gomod_config"
 
-echo "##### Go Module Reset & Rebuild Script by Blackh00d #####"
+# Load the $gomod variable from the configuration file if it exists
+if [ -f "$CONFIG_FILE" ]; then
+  source "$CONFIG_FILE"
+  # Confirm the value of $gomod with the user
+  read -p "The current value of the Go module is '$gomod'. Is this correct? (y/n): " confirm
+  if [ "$confirm" != "y" ]; then
+    unset gomod
+  fi
+fi
 
-# Check if $gomod is set
+# Check if $gomod is set, if not prompt the user and save it
 if [ -z "$gomod" ]; then
   read -p "Please enter the name of the Go module: " gomod
+  echo "gomod=$gomod" > "$CONFIG_FILE"
 fi
 
 # Confirm the value of $gomod
@@ -14,11 +23,10 @@ echo "Go module name: $gomod"
 
 # Remove old Go mod file
 echo "Removing old Go mod file..."
-if rm go.*; then
+if rm go.* 2>/dev/null; then
   echo "Old Go mod file removed successfully."
 else
-  echo "Error: Failed to remove old Go mod file." >&2
-  exit 1
+  echo "No old Go mod file found to remove."
 fi
 
 # Remove old binary if present
